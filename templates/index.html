@@ -24,7 +24,7 @@
                 --button-bg-light: #4CAF50;
                 --button-hover-light: #388E3C;
             }
-    
+        
             body {
                 font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
                 margin: 0;
@@ -36,8 +36,9 @@
                 align-items: center;
                 height: 100vh;
                 text-align: center;
+                overflow: hidden;
             }
-    
+        
             .chat-container {
                 max-width: 800px;
                 width: 100%;
@@ -47,8 +48,9 @@
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
+                height: 90vh;
             }
-    
+        
             .chat-header {
                 background-color: var(--primary-light);
                 color: white;
@@ -58,7 +60,7 @@
                 text-transform: uppercase;
                 border-bottom: 2px solid var(--primary-light);
             }
-    
+        
             .username-container {
                 display: flex;
                 justify-content: center;
@@ -66,14 +68,14 @@
                 background-color: var(--bg-color-light);
                 border-bottom: 1px solid var(--primary-light);
             }
-    
+        
             #current-username {
                 margin-right: 10px;
                 font-weight: bold;
                 color: var(--primary-dark);
                 font-size: 18px;
             }
-    
+        
             #username-input {
                 padding: 8px;
                 border: 1px solid var(--primary-light);
@@ -81,7 +83,7 @@
                 margin-right: 10px;
                 font-size: 16px;
             }
-    
+        
             #update-username-button {
                 background-color: var(--primary-light);
                 color: white;
@@ -91,11 +93,11 @@
                 cursor: pointer;
                 font-size: 16px;
             }
-    
+        
             #update-username-button:hover {
                 background-color: var(--button-hover-light);
             }
-    
+        
             .chat-messages {
                 height: 400px;
                 overflow-y: auto;
@@ -103,15 +105,17 @@
                 background-color: var(--bg-color-light);
                 border-bottom: 1px solid var(--primary-light);
                 position: relative;
+                flex-grow: 1;
+                padding-bottom: 80px;
             }
-    
+        
             .message {
                 margin-bottom: 15px;
                 display: flex;
                 align-items: flex-start;
                 animation: fadeIn 0.5s ease-in-out;
             }
-    
+        
             .message img {
                 width: 40px;
                 height: 40px;
@@ -119,7 +123,7 @@
                 margin-right: 10px;
                 border: 2px solid var(--primary-light);
             }
-    
+        
             .message-content {
                 background-color: var(--message-bg-light);
                 padding: 12px;
@@ -128,20 +132,21 @@
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
                 position: relative;
             }
-    
+        
             .message-username {
                 font-weight: bold;
                 margin-bottom: 5px;
                 color: var(--primary-dark);
             }
-    
+        
             .chat-input {
                 display: flex;
                 padding: 20px;
                 background-color: white;
                 border-top: 1px solid var(--bg-color-light);
+                position: relative;
             }
-    
+        
             #message-input {
                 flex-grow: 1;
                 padding: 12px;
@@ -151,7 +156,7 @@
                 font-size: 16px;
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
-    
+        
             #send-button {
                 background-color: var(--primary-light);
                 color: white;
@@ -163,39 +168,39 @@
                 transition: background-color 0.3s ease;
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
-    
+        
             #send-button:hover {
                 background-color: var(--button-hover-light);
             }
-    
+        
             .system-message {
                 text-align: center;
                 font-style: italic;
                 color: var(--system-message-color-light);
                 margin: 10px 0;
             }
-    
+        
             .message.sent {
                 flex-direction: row-reverse;
             }
-    
+        
             .message.sent .message-content {
                 background-color: var(--primary-light);
                 color: white;
                 margin-left: 10px;
                 margin-right: 0;
             }
-    
+        
             .message.sent .message-username {
                 text-align: right;
                 color: white;
             }
-    
+        
             .message.sent img {
                 margin-right: 0;
                 margin-left: 10px;
             }
-    
+        
             @keyframes fadeIn {
                 0% {
                     opacity: 0;
@@ -206,7 +211,82 @@
                     transform: translateY(0);
                 }
             }
+        
+            /* Media Queries for Responsiveness */
+            @media (max-width: 768px) {
+                .chat-container {
+                    max-width: 100%;
+                    border-radius: 0;
+                    height: 100%;
+                }
+        
+                .chat-header {
+                    font-size: 24px;
+                    padding: 15px;
+                }
+        
+                #username-input, #message-input {
+                    font-size: 14px;
+                }
+        
+                .chat-messages {
+                    padding: 15px;
+                }
+        
+                .message img {
+                    width: 35px;
+                    height: 35px;
+                }
+        
+                #send-button {
+                    font-size: 14px;
+                    padding: 10px 18px;
+                }
+        
+                .message-content {
+                    max-width: 80%;
+                }
+        
+                .username-container {
+                    flex-direction: column;
+                    padding: 10px;
+                }
+        
+                #current-username {
+                    margin-bottom: 10px;
+                }
+            }
+        
+            @media (max-width: 480px) {
+                .chat-header {
+                    font-size: 20px;
+                    padding: 12px;
+                }
+        
+                .message img {
+                    width: 30px;
+                    height: 30px;
+                }
+        
+                .chat-input {
+                    padding: 15px;
+                }
+        
+                #send-button {
+                    font-size: 12px;
+                    padding: 10px 15px;
+                }
+        
+                .message-content {
+                    max-width: 90%;
+                }
+        
+                .message-username {
+                    font-size: 14px;
+                }
+            }
         </style>
+        
 	</head>
 	<body>
 		<div class="chat-container">
