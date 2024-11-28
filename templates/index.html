@@ -23,6 +23,16 @@
             --system-message-color-light: #6c757d;
             --button-bg-light: #4CAF50;
             --button-hover-light: #388E3C;
+
+            /* Colors for Dark Mode - Softer Dark Mode */
+            --primary-light-dark: #4a90e2;
+            --primary-dark-dark: #357ab7;
+            --text-color-dark: #e1e1e1;
+            --bg-color-dark: #232323;
+            --message-bg-dark: #2e2e2e;
+            --system-message-color-dark: #888888;
+            --button-bg-dark: #4a90e2;
+            --button-hover-dark: #357ab7;
         }
 
         body {
@@ -36,6 +46,12 @@
             align-items: center;
             height: 100vh;
             text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
         }
 
         .chat-container {
@@ -47,6 +63,11 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s;
+        }
+
+        .chat-container.dark-mode {
+            background-color: #333;
         }
 
         .chat-header {
@@ -57,6 +78,10 @@
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 2px solid var(--primary-light);
+        }
+
+        .chat-header.dark-mode {
+            background-color: var(--primary-light-dark);
         }
 
         .username-container {
@@ -80,6 +105,11 @@
             border-radius: 20px;
             margin-right: 10px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #username-input:focus {
+            border-color: var(--primary-light);
         }
 
         #update-username-button {
@@ -90,6 +120,7 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         #update-username-button:hover {
@@ -103,6 +134,10 @@
             background-color: var(--bg-color-light);
             border-bottom: 1px solid var(--primary-light);
             position: relative;
+        }
+
+        .chat-messages.dark-mode {
+            background-color: var(--message-bg-dark);
         }
 
         .message {
@@ -127,6 +162,10 @@
             max-width: 70%;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             position: relative;
+        }
+
+        .message-content.dark-mode {
+            background-color: var(--message-bg-dark);
         }
 
         .message-username {
@@ -175,6 +214,10 @@
             margin: 10px 0;
         }
 
+        .system-message.dark-mode {
+            color: var(--system-message-color-dark);
+        }
+
         .message.sent {
             flex-direction: row-reverse;
         }
@@ -206,135 +249,107 @@
                 transform: translateY(0);
             }
         }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-light);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: var(--button-hover-light);
+        }
+
+        .dark-mode-toggle span {
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            Chattrly - Chat Application
+            Chattrly Chat
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()"><span>🌙 Dark Mode</span></button>
         </div>
-
         <div class="username-container">
-            <div id="current-username">Username:</div>
-            <input type="text" id="username-input" placeholder="Enter your username" />
-            <button id="update-username-button">Update</button>
+            <span id="current-username">Username: Guest</span>
+            <input type="text" id="username-input" placeholder="Enter username" />
+            <button id="update-username-button">Update Username</button>
         </div>
-
-        <div class="chat-messages">
-            <div class="message">
-                <img src="https://i.pravatar.cc/50?img=1" alt="user-avatar" />
-                <div class="message-content">
-                    <div class="message-username">User1</div>
-                    Hello, this is a test message!
-                </div>
-            </div>
-        </div>
-
+        <div class="chat-messages"></div>
         <div class="chat-input">
             <input type="text" id="message-input" placeholder="Type a message..." />
             <button id="send-button">Send</button>
         </div>
-
-        <div class="system-message">
-            System: Chat is open!
-        </div>
     </div>
 
     <script>
-        const socket = io();
-        const sendButton = document.getElementById("send-button");
-        const messageInput = document.getElementById("message-input");
-        const chatMessages = document.getElementById("chat-messages");
-        const currentUsernameSpan = document.getElementById("current-username");
-        const usernameInput = document.getElementById("username-input");
-        const updateUsernameButton = document.getElementById("update-username-button");
+        const darkModeToggle = document.querySelector('.dark-mode-toggle');
+        const body = document.body;
+        const chatMessages = document.querySelector('.chat-messages');
+        const chatContainer = document.querySelector('.chat-container');
+        const chatHeader = document.querySelector('.chat-header');
 
-        let currentUsername = "";
+        function toggleDarkMode() {
+            body.classList.toggle('dark-mode');
+            chatMessages.classList.toggle('dark-mode');
+            chatContainer.classList.toggle('dark-mode');
+            chatHeader.classList.toggle('dark-mode');
 
-        socket.on("set_username", (data) => {
-            currentUsername = data.username;
-            currentUsernameSpan.textContent = `Your username: ${currentUsername}`;
-        });
+            const isDarkMode = body.classList.contains('dark-mode');
+            darkModeToggle.innerHTML = isDarkMode ? '🌞 Light Mode' : '🌙 Dark Mode';
+        }
 
-        socket.on("user_joined", (data) => {
-            addMessage(`${data.username} joined the chat`, "system");
-        });
+        function appendMessage(message, username) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            
+            const avatar = document.createElement('img');
+            avatar.src = `https://robohash.org/${username}.png`;
+            avatar.alt = username;
 
-        socket.on("user_left", (data) => {
-            addMessage(`${data.username} left the chat`, "system");
-        });
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            
+            const usernameSpan = document.createElement('span');
+            usernameSpan.classList.add('message-username');
+            usernameSpan.innerText = username;
 
-        socket.on("new_message", (data) => {
-            addMessage(data.message, "user", data.username, data.avatar);
-        });
+            messageContent.appendChild(usernameSpan);
+            messageContent.appendChild(document.createTextNode(message));
 
-        socket.on("username_updated", (data) => {
-            addMessage(`${data.old_username} changed their name to ${data.new_username}`, "system");
-            if (data.old_username === currentUsername) {
-                currentUsername = data.new_username;
-                currentUsernameSpan.textContent = `Your username: ${currentUsername}`;
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
+        }
+
+        document.getElementById('send-button').addEventListener('click', () => {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            if (message.trim()) {
+                appendMessage(message, 'User');
+                messageInput.value = '';
             }
         });
 
-        sendButton.addEventListener("click", sendMessage);
-        messageInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") sendMessage();
-        });
-
-        updateUsernameButton.addEventListener("click", updateUsername);
-
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message === "") return;
-
-            socket.emit("send_message", {
-                username: currentUsername,
-                message: message,
-            });
-            messageInput.value = "";
-        }
-
-        function updateUsername() {
+        document.getElementById('update-username-button').addEventListener('click', () => {
+            const usernameInput = document.getElementById('username-input');
             const newUsername = usernameInput.value.trim();
-            if (newUsername === "") return;
-
-            const oldUsername = currentUsername;
-            socket.emit("update_username", {
-                old_username: oldUsername,
-                new_username: newUsername,
-            });
-            usernameInput.value = "";
-        }
-
-        function addMessage(message, type = "user", username = "", avatar = "https://i.pravatar.cc/50") {
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message");
-            if (type === "sent") messageElement.classList.add("sent");
-
-            const avatarElement = document.createElement("img");
-            avatarElement.src = avatar;
-            avatarElement.alt = "user-avatar";
-
-            const messageContentElement = document.createElement("div");
-            messageContentElement.classList.add("message-content");
-
-            if (username) {
-                const usernameElement = document.createElement("div");
-                usernameElement.classList.add("message-username");
-                usernameElement.textContent = username;
-                messageContentElement.appendChild(usernameElement);
+            if (newUsername) {
+                document.getElementById('current-username').innerText = `Username: ${newUsername}`;
             }
-
-            messageContentElement.textContent = message;
-            messageElement.appendChild(avatarElement);
-            messageElement.appendChild(messageContentElement);
-
-            chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Emit initial username
-        socket.emit("set_username", { username: currentUsername });
+        });
     </script>
 </body>
 </html>
