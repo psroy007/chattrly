@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chattrly - Connect, Converse, Communicate</title>
+    <link rel="shortcut icon" href="https://img.icons8.com/?size=48&id=13724&format=png" type="image/x-icon">
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"
+        integrity="sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    ></script>
+
+    <style>
+        :root {
+            /* Colors for Light Mode */
+            --primary-light: #4CAF50;
+            --primary-dark: #388E3C;
+            --text-color-light: #333;
+            --bg-color-light: #f9f9f9;
+            --message-bg-light: #eaf1e3;
+            --system-message-color-light: #6c757d;
+            --button-bg-light: #4CAF50;
+            --button-hover-light: #388E3C;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .username-container {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background-color: var(--bg-color-light);
+            border-bottom: 1px solid var(--primary-light);
+        }
+
+        #current-username {
+            margin-right: 10px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            font-size: 18px;
+        }
+
+        #username-input {
+            padding: 8px;
+            border: 1px solid var(--primary-light);
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        #update-username-button {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #update-username-button:hover {
+            background-color: var(--button-hover-light);
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--bg-color-light);
+            border-bottom: 1px solid var(--primary-light);
+            position: relative;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .message img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid var(--primary-light);
+        }
+
+        .message-content {
+            background-color: var(--message-bg-light);
+            padding: 12px;
+            border-radius: 18px;
+            max-width: 70%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .message-username {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-dark);
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background-color: white;
+            border-top: 1px solid var(--bg-color-light);
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--primary-light);
+            border-radius: 25px;
+            margin-right: 10px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #send-button {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #send-button:hover {
+            background-color: var(--button-hover-light);
+        }
+
+        .system-message {
+            text-align: center;
+            font-style: italic;
+            color: var(--system-message-color-light);
+            margin: 10px 0;
+        }
+
+        .message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message.sent .message-content {
+            background-color: var(--primary-light);
+            color: white;
+            margin-left: 10px;
+            margin-right: 0;
+        }
+
+        .message.sent .message-username {
+            text-align: right;
+            color: white;
+        }
+
+        .message.sent img {
+            margin-right: 0;
+            margin-left: 10px;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chattrly - Chat Application
+        </div>
+
+        <div class="username-container">
+            <div id="current-username">Username:</div>
+            <input type="text" id="username-input" placeholder="Enter your username" />
+            <button id="update-username-button">Update</button>
+        </div>
+
+        <div class="chat-messages">
+            <div class="message">
+                <img src="https://i.pravatar.cc/50?img=1" alt="user-avatar" />
+                <div class="message-content">
+                    <div class="message-username">User1</div>
+                    Hello, this is a test message!
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Type a message..." />
+            <button id="send-button">Send</button>
+        </div>
+
+        <div class="system-message">
+            System: Chat is open!
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const sendButton = document.getElementById("send-button");
+        const messageInput = document.getElementById("message-input");
+        const chatMessages = document.getElementById("chat-messages");
+        const currentUsernameSpan = document.getElementById("current-username");
+        const usernameInput = document.getElementById("username-input");
+        const updateUsernameButton = document.getElementById("update-username-button");
+
+        let currentUsername = "";
+
+        socket.on("set_username", (data) => {
+            currentUsername = data.username;
+            currentUsernameSpan.textContent = `Your username: ${currentUsername}`;
+        });
+
+        socket.on("user_joined", (data) => {
+            addMessage(`${data.username} joined the chat`, "system");
+        });
+
+        socket.on("user_left", (data) => {
+            addMessage(`${data.username} left the chat`, "system");
+        });
+
+        socket.on("new_message", (data) => {
+            addMessage(data.message, "user", data.username, data.avatar);
+        });
+
+        socket.on("username_updated", (data) => {
+            addMessage(`${data.old_username} changed their name to ${data.new_username}`, "system");
+            if (data.old_username === currentUsername) {
+                currentUsername = data.new_username;
+                currentUsernameSpan.textContent = `Your username: ${currentUsername}`;
+            }
+        });
+
+        sendButton.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        updateUsernameButton.addEventListener("click", updateUsername);
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === "") return;
+
+            socket.emit("send_message", {
+                username: currentUsername,
+                message: message,
+            });
+            messageInput.value = "";
+        }
+
+        function updateUsername() {
+            const newUsername = usernameInput.value.trim();
+            if (newUsername === "") return;
+
+            const oldUsername = currentUsername;
+            socket.emit("update_username", {
+                old_username: oldUsername,
+                new_username: newUsername,
+            });
+            usernameInput.value = "";
+        }
+
+        function addMessage(message, type = "user", username = "", avatar = "https://i.pravatar.cc/50") {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            if (type === "sent") messageElement.classList.add("sent");
+
+            const avatarElement = document.createElement("img");
+            avatarElement.src = avatar;
+            avatarElement.alt = "user-avatar";
+
+            const messageContentElement = document.createElement("div");
+            messageContentElement.classList.add("message-content");
+
+            if (username) {
+                const usernameElement = document.createElement("div");
+                usernameElement.classList.add("message-username");
+                usernameElement.textContent = username;
+                messageContentElement.appendChild(usernameElement);
+            }
+
+            messageContentElement.textContent = message;
+            messageElement.appendChild(avatarElement);
+            messageElement.appendChild(messageContentElement);
+
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Emit initial username
+        socket.emit("set_username", { username: currentUsername });
+    </script>
+</body>
+</html>
